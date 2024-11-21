@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script type="text/javascript">
+        const cvs = document.createElement("canvas");
+        cvs.width = window.innerWidth;
+        cvs.height = window.innerHeight;
+        document.getElementById('container').appendChild(cvs);
+        const ctx = cvs.getContext("2d");
+
+        let number_of_dices_of_player = 0;
+        let number_of_dices_of_computer = 0;
+        const maxDices = 3;
+        let playerDices = [];
+        let computerDices = [];
+        let goal_number = 0;
+
+        let isInteractable = false; // Người chơi không được tương tác
+
+        class Dice {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = 100;
+                this.height = 100;
+                this.value = this.roll();
+            }
+
+            roll() {
+                return Math.floor(Math.random() * 6) + 1;
+            }
+
+            draw(ctx) {
+                ctx.clearRect(this.x, this.y, this.width, this.height);
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+                ctx.font = "50px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(
+                    this.value,
+                    this.x + this.width / 2,
+                    this.y + this.height / 2
+                );
+            }
+        }
+
+        class Button {
+            constructor(x, y, radius, label, onClick) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.label = label;
+                this.onClick = onClick;
+                this.initEventListeners();
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.fillStyle = "rgba(0, 255, 0, 0.7)";
+                ctx.strokeStyle = "black";
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.font = "20px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "black";
+                ctx.fillText(this.label, this.x, this.y);
+            }
+
+            initEventListeners() {
+                window.addEventListener("mousedown", (e) => {
+                    const dx = this.x - e.clientX;
+                    const dy = this.y - e.clientY;
+                    const isClicked = Math.sqrt(dx * dx + dy * dy) < this.radius;
+                    if (isClicked && isInteractable) this.onClick();
+                });
+            }
+        }
+
+        function rollAllDices(dices) {
+            dices.forEach((dice) => {
+                dice.value = dice.roll();
+                dice.draw(ctx);
+            });
+        }
+
+        function compare(computer_value, player_value, goal_number) {
+            const computerDiff = Math.abs(computer_value - goal_number);
+            const playerDiff = Math.abs(player_value - goal_number);
+            if (computerDiff < playerDiff) return "Computer Won!";
+            if (computerDiff === playerDiff) return "Draw!";
+            return "You Won!";
+        }
+
+        function render(showButtons = false) {
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+            // Hiển thị luật chơi
+            ctx.font = "100px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(`If your result is closer to the goal than computer's, you win!`, cvs.width / 2, 200);
+
+            // Hiển thị số mục tiêu (goal_number)
+            ctx.font = "100px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(`Goal: ${goal_number}`, cvs.width / 2, 400);
+
+            // Vẽ các nút bấm nếu showButtons là true
+            if (showButtons) {
+                for (let i = 1; i <= maxDices; i++) {
+                    new Button(
+                        (cvs.width / (maxDices + 1)) * i,
+                        cvs.height - 100,
+                        50,
+                        `${i} Dice(s)`,
+                        () => {
+                            if (isInteractable = false) return; // Chỉ xử lý nếu trạng thái tương tác được bật
+                            number_of_dices_of_player = i;
+                            isInteractable = false; // Tắt tương tác sau khi người chơi chọn
+                            startPlayerGame();
+                        }
+                    ).draw(ctx);
+                }
+
+                // Chỉ bật trạng thái `isInteractable` sau khi các nút đã được vẽ
+                isInteractable = true;
+            }
+        }
+
+        function startGame() {
+            // Đặt giá trị ngẫu nhiên cho goal_number
+            goal_number = Math.floor(Math.random() * 18) + 1;
+
+            // Hiển thị goal_number trước
+            render(false);
+
+            // Sau 1 giây, hiển thị các nút bấm
+            setTimeout(() => {
+                render(true);
+            }, 1000);
+
+            // Xác định số lượng xúc xắc của máy tính
+            number_of_dices_of_computer = goal_number < 8 ? 1 : goal_number < 14 ? 2 : 3;
+
+            // Tạo các xúc xắc của máy tính
+            computerDices = Array.from({ length: number_of_dices_of_computer }, (_, i) =>
+                new Dice(100 + i * 120, cvs.height / 2 - 50)
+            );
+        }
+
+        function startPlayerGame() {
+            // Tạo xúc xắc của người chơi dựa trên lựa chọn
+            playerDices = [];
+            for (let i = 0; i < number_of_dices_of_player; i++) {
+                // Tạo một đối tượng Dice mới cho mỗi xúc xắc và đẩy vào mảng playerDices
+                playerDices.push(new Dice(100 + i * 120, cvs.height / 2 + 150));
+            }
+
+
+            // Gieo xúc xắc
+            rollAllDices(playerDices);
+            rollAllDices(computerDices);
+
+            // Tính tổng điểm cho người chơi
+            let playerSum = 0;
+            playerDices.forEach((dice) => {
+                playerSum += dice.value; // Cộng giá trị của mỗi xúc xắc vào playerSum
+            });
+
+            // Tính tổng điểm cho máy tính
+            let computerSum = 0;
+            computerDices.forEach((dice) => {
+                computerSum += dice.value; // Cộng giá trị của mỗi xúc xắc vào computerSum
+            });
+
+            // Hiển thị kết quả
+            const result = compare(computerSum, playerSum, goal_number);
+
+            // Xóa phần kết quả cũ trước khi hiển thị kết quả mới
+            ctx.clearRect(500, cvs.height / 2 - 300, cvs.width, 600);
+
+            // Hiển thị kết quả người chơi
+            ctx.fillStyle = "black";
+            ctx.fillText(`You : ${playerSum}`, 700, cvs.height / 2 + 200);
+
+            // Hiển thị kết quả của máy
+            ctx.fillStyle = "black";
+            ctx.fillText(`Computer : ${computerSum}`, 700, cvs.height / 2 - 10);
+
+            // Hiển thị kết quả mới
+            ctx.fillStyle = "black";
+            ctx.fillText(result, cvs.width / 2, cvs.height / 2);
+
+            // Sau 3 giây, reset trò chơi để chơi lại
+            setTimeout(() => {
+                resetGame();
+            }, 3000);
+        }
+
+        function resetGame() {
+            // Xóa toàn bộ canvas trước khi vẽ lại trò chơi
+            ctx.clearRect(0, 0, cvs.width, cvs.height); // Xóa toàn bộ canvas
+
+            // Đặt lại các giá trị ban đầu
+            number_of_dices_of_player = 0;
+            number_of_dices_of_computer = 0;
+            playerDices = [];
+            computerDices = [];
+            goal_number = 0;
+
+            // Không cho tương tác khi chưa bắt đầu game mới
+            isInteractable = false;
+
+            // Bắt đầu lại trò chơi
+            startGame();
+        }
+
+        // Bắt đầu trò chơi
+        startGame();
+    </script>
+</body>
+</html>
