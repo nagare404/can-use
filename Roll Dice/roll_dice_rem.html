@@ -19,15 +19,13 @@
         cvs.height = window.innerHeight;
         document.getElementById('container').appendChild(cvs);
         const ctx = cvs.getContext("2d");
-
         let number_of_dices_of_player = 0;
         let number_of_dices_of_computer = 0;
         const maxDices = 3;
         let playerDices = [];
         let computerDices = [];
         let goal_number = 0;
-
-        let isInteractable = false; // Người chơi không được tương tác
+        let isInteractable = false; // The player cannot interact
 
         class Dice {
             constructor(x, y) {
@@ -37,16 +35,13 @@
                 this.height = 100;
                 this.value = this.roll();
             }
-
             roll() {
                 return Math.floor(Math.random() * 6) + 1;
             }
-
             draw(ctx) {
                 ctx.clearRect(this.x, this.y, this.width, this.height);
                 ctx.strokeRect(this.x, this.y, this.width, this.height);
-
-                ctx.font = "1.5rem Arial";  // Đã đổi thành rem để linh hoạt
+                ctx.font = "1.5rem Arial";  // Changed to rem for flexibility
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillText(
@@ -66,7 +61,6 @@
                 this.onClick = onClick;
                 this.initEventListeners();
             }
-
             draw(ctx) {
                 ctx.beginPath();
                 ctx.fillStyle = "rgba(0, 255, 0, 0.7)";
@@ -74,14 +68,12 @@
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
-
-                ctx.font = "1rem Arial"; // Đã đổi thành rem để linh hoạt
+                ctx.font = "1rem Arial"; // Changed to rem for flexibility
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillStyle = "black";
                 ctx.fillText(this.label, this.x, this.y);
             }
-
             initEventListeners() {
                 window.addEventListener("mousedown", (e) => {
                     const dx = this.x - e.clientX;
@@ -110,19 +102,23 @@
         function render(showButtons = false) {
             ctx.clearRect(0, 0, cvs.width, cvs.height);
 
-            // Hiển thị luật chơi
+            // Display game rules
             let rule_bottom = 50;
-            ctx.font = "2rem Arial";  // Đã đổi thành rem để linh hoạt
+            ctx.font = "2rem Arial";  // Changed to rem for flexibility
             ctx.textAlign = "center";
             ctx.fillText(`If your result is closer to the goal than computer's, you win!`, cvs.width / 2, rule_bottom);
 
-            // Hiển thị số mục tiêu (goal_number)
-            ctx.font = "2rem Arial";  // Đã đổi thành rem để linh hoạt
+            // Display target number (goal_number)
+            ctx.font = "2rem Arial";  // Changed to rem for flexibility
             ctx.textAlign = "center";
             ctx.fillText(`Goal: ${goal_number}`, cvs.width / 2, rule_bottom + 50);
 
-            // Vẽ các nút bấm nếu showButtons là true
+            // Draw buttons if showButtons is true
             if (showButtons) {
+                // Display instructions
+                ctx.font = "2rem Arial";  // Changed to rem for flexibility
+                ctx.textAlign = "center";
+                ctx.fillText(`Select number of dices you want to use:`, cvs.width / 2, cvs.height - 200);
                 for (let i = 1; i <= maxDices; i++) {
                     new Button(
                         (cvs.width / (maxDices + 1)) * i,
@@ -130,85 +126,82 @@
                         50,
                         `${i} Dice(s)`,
                         () => {
-                            if (isInteractable = false) return; // Chỉ xử lý nếu trạng thái tương tác được bật
+                            if (isInteractable = false) return; // Only handle if interactable is enabled
                             number_of_dices_of_player = i;
-                            isInteractable = false; // Tắt tương tác sau khi người chơi chọn
+                            isInteractable = false; // Disable interaction after player selects
                             startPlayerGame();
                         }
                     ).draw(ctx);
                 }
-
-                // Chỉ bật trạng thái `isInteractable` sau khi các nút đã được vẽ
+                // Enable `isInteractable` state after buttons are drawn
                 isInteractable = true;
             }
         }
 
         function startGame() {
-            // Đặt giá trị ngẫu nhiên cho goal_number
+            // Set a random value for goal_number
             goal_number = Math.floor(Math.random() * 18) + 1;
 
-            // Hiển thị goal_number trước
+            // Display goal_number initially
             render(false);
 
-            // Sau 1 giây, hiển thị các nút bấm
+            // After 1 second, display the buttons
             setTimeout(() => {
                 render(true);
             }, 1000);
 
-            // Xác định số lượng xúc xắc của máy tính
+            // Determine the number of dices for the computer
             number_of_dices_of_computer = goal_number < 8 ? 1 : goal_number < 14 ? 2 : 3;
 
-            // Tạo các xúc xắc của máy tính
+            // Create computer's dices
             computerDices = Array.from({ length: number_of_dices_of_computer }, (_, i) =>
                 new Dice(50 + i * 120, cvs.height / 2 - 150)
             );
         }
 
         function startPlayerGame() {
-            // Tạo xúc xắc của người chơi dựa trên lựa chọn
+            // Create player's dices based on their selection
             playerDices = [];
             for (let i = 0; i < number_of_dices_of_player; i++) {
-                // Tạo một đối tượng Dice mới cho mỗi xúc xắc và đẩy vào mảng playerDices
-                playerDices.push(new Dice(50 + i * 120, cvs.height / 2 ));
+                // Create a new Dice object for each dice and push it into the playerDices array
+                playerDices.push(new Dice(50 + i * 120, cvs.height / 2));
             }
 
-            // Gieo xúc xắc
+            // Roll dices
             rollAllDices(playerDices);
             rollAllDices(computerDices);
 
-            // Tính tổng điểm cho người chơi
+            // Calculate the total score for the player
             let playerSum = 0;
             playerDices.forEach((dice) => {
-                playerSum += dice.value; // Cộng giá trị của mỗi xúc xắc vào playerSum
+                playerSum += dice.value; // Add each dice's value to playerSum
             });
 
-            // Tính tổng điểm cho máy tính
+            // Calculate the total score for the computer
             let computerSum = 0;
             computerDices.forEach((dice) => {
-                computerSum += dice.value; // Cộng giá trị của mỗi xúc xắc vào computerSum
+                computerSum += dice.value; // Add each dice's value to computerSum
             });
 
-            // Hiển thị kết quả
+            // Display the result
             const result = compare(computerSum, playerSum, goal_number);
 
-            // Hiển thị kết quả người chơi
+            // Display player's result
             ctx.fillStyle = "black";
             ctx.fillText(`You : ${playerSum}`, 500, cvs.height / 2 + 50);
 
-            // Hiển thị kết quả của máy
+            // Display computer's result
             ctx.fillStyle = "black";
             ctx.fillText(`Computer : ${computerSum}`, 500, cvs.height / 2 - 100);
 
-            // Hiển thị kết quả mới
+            // Display the new result
             ctx.fillStyle = "black";
             ctx.fillText(result, cvs.width / 2, cvs.height / 2);
 
-            // Sau 3 giây, reset trò chơi
+            // Reset the game after 3 seconds
             setTimeout(() => {
                 startGame();
             }, 3000);
-
-            
         }
 
         startGame();
