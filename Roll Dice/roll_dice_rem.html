@@ -46,7 +46,7 @@
                 ctx.clearRect(this.x, this.y, this.width, this.height);
                 ctx.strokeRect(this.x, this.y, this.width, this.height);
 
-                ctx.font = "50px Arial";
+                ctx.font = "1.5rem Arial";  // Đã đổi thành rem để linh hoạt
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillText(
@@ -75,7 +75,7 @@
                 ctx.fill();
                 ctx.stroke();
 
-                ctx.font = "20px Arial";
+                ctx.font = "1rem Arial"; // Đã đổi thành rem để linh hoạt
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.fillStyle = "black";
@@ -111,14 +111,15 @@
             ctx.clearRect(0, 0, cvs.width, cvs.height);
 
             // Hiển thị luật chơi
-            ctx.font = "100px Arial";
+            let rule_bottom = 50;
+            ctx.font = "2rem Arial";  // Đã đổi thành rem để linh hoạt
             ctx.textAlign = "center";
-            ctx.fillText(`If your result is closer to the goal than computer's, you win!`, cvs.width / 2, 200);
+            ctx.fillText(`If your result is closer to the goal than computer's, you win!`, cvs.width / 2, rule_bottom);
 
             // Hiển thị số mục tiêu (goal_number)
-            ctx.font = "100px Arial";
+            ctx.font = "2rem Arial";  // Đã đổi thành rem để linh hoạt
             ctx.textAlign = "center";
-            ctx.fillText(`Goal: ${goal_number}`, cvs.width / 2, 400);
+            ctx.fillText(`Goal: ${goal_number}`, cvs.width / 2, rule_bottom + 50);
 
             // Vẽ các nút bấm nếu showButtons là true
             if (showButtons) {
@@ -159,7 +160,7 @@
 
             // Tạo các xúc xắc của máy tính
             computerDices = Array.from({ length: number_of_dices_of_computer }, (_, i) =>
-                new Dice(100 + i * 120, cvs.height / 2 - 50)
+                new Dice(50 + i * 120, cvs.height / 2 - 150)
             );
         }
 
@@ -168,9 +169,8 @@
             playerDices = [];
             for (let i = 0; i < number_of_dices_of_player; i++) {
                 // Tạo một đối tượng Dice mới cho mỗi xúc xắc và đẩy vào mảng playerDices
-                playerDices.push(new Dice(100 + i * 120, cvs.height / 2 + 150));
+                playerDices.push(new Dice(50 + i * 120, cvs.height / 2 ));
             }
-
 
             // Gieo xúc xắc
             rollAllDices(playerDices);
@@ -191,46 +191,24 @@
             // Hiển thị kết quả
             const result = compare(computerSum, playerSum, goal_number);
 
-            // Xóa phần kết quả cũ trước khi hiển thị kết quả mới
-            ctx.clearRect(500, cvs.height / 2 - 300, cvs.width, 600);
-
             // Hiển thị kết quả người chơi
             ctx.fillStyle = "black";
-            ctx.fillText(`You : ${playerSum}`, 700, cvs.height / 2 + 200);
+            ctx.fillText(`You : ${playerSum}`, 500, cvs.height / 2 + 50);
 
             // Hiển thị kết quả của máy
             ctx.fillStyle = "black";
-            ctx.fillText(`Computer : ${computerSum}`, 700, cvs.height / 2 - 10);
+            ctx.fillText(`Computer : ${computerSum}`, 500, cvs.height / 2 - 100);
 
             // Hiển thị kết quả mới
             ctx.fillStyle = "black";
             ctx.fillText(result, cvs.width / 2, cvs.height / 2);
 
-            // Sau 3 giây, reset trò chơi để chơi lại
+            // Sau 3 giây, reset trò chơi
             setTimeout(() => {
-                resetGame();
+                render(true);
             }, 3000);
         }
 
-        function resetGame() {
-            // Xóa toàn bộ canvas trước khi vẽ lại trò chơi
-            ctx.clearRect(0, 0, cvs.width, cvs.height); // Xóa toàn bộ canvas
-
-            // Đặt lại các giá trị ban đầu
-            number_of_dices_of_player = 0;
-            number_of_dices_of_computer = 0;
-            playerDices = [];
-            computerDices = [];
-            goal_number = 0;
-
-            // Không cho tương tác khi chưa bắt đầu game mới
-            isInteractable = false;
-
-            // Bắt đầu lại trò chơi
-            startGame();
-        }
-
-        // Bắt đầu trò chơi
         startGame();
     </script>
 </body>
