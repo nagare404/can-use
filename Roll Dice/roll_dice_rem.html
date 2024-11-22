@@ -129,6 +129,7 @@
                             if (isInteractable = false) return; // Only handle if interactable is enabled
                             number_of_dices_of_player = i;
                             isInteractable = false; // Disable interaction after player selects
+                            render(false); // Hide buttons and instruction for better visual experience
                             startPlayerGame();
                         }
                     ).draw(ctx);
