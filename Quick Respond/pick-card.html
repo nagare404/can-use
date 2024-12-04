@@ -27,7 +27,7 @@
         let computerScore = 0;
         let isInteractable = false;
         let countdown = 3; // Countdown from 3
-        let computerReactionTime = 2000;
+        let computerReactionTime = 1500;
         const cardWidth = 100;
         const cardHeight = 150;
         const cardSpacing = 50;
@@ -192,6 +192,7 @@
             // Reset scores and start a new round
             playerScore = 0;
             computerScore = 0;
+            computerReactionTime = 1500;
             startNextTurn();
         }
 
