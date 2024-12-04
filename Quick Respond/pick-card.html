@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reaction Time Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script type="text/javascript">
+        const cvs = document.createElement("canvas");
+        cvs.width = window.innerWidth;
+        cvs.height = window.innerHeight;
+        document.getElementById('container').appendChild(cvs);
+        const ctx = cvs.getContext("2d");
+        const maxCards = 10;
+        const cardValues = Array.from({ length: maxCards }, (_, i) => i + 1); // [1, 2, ..., 10]
+        const cardsOnField = [];
+        let goalNumber = 0;
+        let playerScore = 0;
+        let computerScore = 0;
+        let isInteractable = false;
+        let countdown = 3; // Countdown from 3
+        let computerReactionTime = 2000;
+        const cardWidth = 100;
+        const cardHeight = 150;
+        const cardSpacing = 50;
+        const numCardsPerRow = 5;
+
+        class Card {
+            constructor(x, y, value, onClick) {
+                this.x = x;
+                this.y = y;
+                this.width = cardWidth;
+                this.height = cardHeight;
+                this.value = value;
+                this.color = "white";
+                this.onClick = onClick;
+                this.initEventListeners();
+            }
+
+            draw() {
+                // Draw the card with its color and value
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.strokeStyle = "black";
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+                ctx.font = "1.5rem Arial";
+                ctx.fillStyle = "black";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(this.value, this.x + this.width / 2, this.y + this.height / 2);
+            }
+
+            initEventListeners() {
+                // Set up mouse click event listener for interacting with cards
+                window.addEventListener("mousedown", (e) => {
+                    if (
+                        e.clientX >= this.x &&
+                        e.clientX <= this.x + this.width &&
+                        e.clientY >= this.y &&
+                        e.clientY <= this.y + this.height &&
+                        isInteractable
+                    ) {
+                        this.onClick();
+                    }
+                });
+            }
+        }
+
+        function render() {
+            // Clear the canvas before rendering
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+            if (countdown > 0) {
+                // Display the countdown
+                ctx.font = "3rem Arial";
+                ctx.textAlign = "center";
+                ctx.fillStyle = "black";
+                ctx.fillText(countdown, cvs.width / 2, cvs.height / 2);
+            } else {
+                // Display the goal number and scores
+                ctx.textAlign = "center";
+                ctx.fillStyle = "black";
+                ctx.font = "4rem Arial";
+                ctx.fillText(`Goal: ${goalNumber}`, cvs.width / 2, 150);
+                ctx.font = "2rem Arial";
+                ctx.fillText(`Player: ${playerScore} - Computer: ${computerScore}`, cvs.width / 2, 50);
+                // Draw all the cards on the field
+                cardsOnField.forEach(card => card.draw());
+            }
+        }
+
+        function startNextTurn() {
+            goalNumber = Math.floor(Math.random() * maxCards) + 1;
+            cardsOnField.length = 0;
+            shuffleArray(cardValues);
+            // Distribute cards in two rows, centered on the canvas.
+            cardValues.forEach((value, index) => {
+                // Determine the row and column of the current card.
+                const row = Math.floor(index / numCardsPerRow);
+                const col = index % numCardsPerRow;
+                // Calculate the total width of a row, including spacing between cards.
+                const totalRowWidth = numCardsPerRow * cardWidth + (numCardsPerRow - 1) * cardSpacing; // 5 cards and 4 spaces
+                // Find the starting X position to center the row on the canvas.
+                const canvasCenterX = cvs.width / 2;
+                const startX = canvasCenterX - totalRowWidth / 2;
+                // Calculate the total height of two rows, including spacing.
+                const totalRowsHeight = 2 * cardHeight + cardSpacing; // 2 rows, 1 space
+                // Find the starting Y position to center the rows on the canvas.
+                const canvasCenterY = cvs.height / 2;
+                const startY = canvasCenterY - totalRowsHeight / 2;
+                // Compute the exact X and Y coordinates for the card.
+                const x = startX + col * (cardWidth + cardSpacing);
+                const y = startY + row * (cardHeight + cardSpacing);
+                // Create a new card
+                cardsOnField.push(new Card(x, y, value, () => handlePlayerPick(value)));
+            });
+            isInteractable = false;
+            countdown = 4;
+            const countdownInterval = setInterval(() => {
+                if (countdown === 0) {
+                    clearInterval(countdownInterval);
+                    render();
+                    isInteractable = true;
+                    setTimeout(() => {
+                        if (isInteractable) {
+                            handleComputerPick();
+                        }
+                    }, computerReactionTime);
+                    computerReactionTime -= 200;
+                } else {
+                    countdown--;
+                    render();
+                }
+            }, 1000);
+        }
+
+        function handlePlayerPick(value) {
+            // Handle player's pick and check if the chosen card is the goal number
+            if (value === goalNumber) {
+                playerScore++;
+                cardsOnField.find(card => card.value === value).color = "green";
+                isInteractable = false;
+                checkGameOver();
+            }
+        }
+
+        function handleComputerPick() {
+            // Handle computer's pick and check if it matches the goal number
+            const targetCard = cardsOnField.find(card => card.value === goalNumber);
+            if (targetCard) {
+                targetCard.color = "red";
+                computerScore++;
+            }
+            isInteractable = false;
+            checkGameOver();
+        }
+
+        function checkGameOver() {
+            render();
+            // Check if either player has won
+            if (playerScore > maxCards / 2) {
+                setTimeout(() => {
+                    ctx.clearRect(0, 0, cvs.width, cvs.height);
+                    ctx.font = "4rem Arial";
+                    ctx.textAlign = "center";
+                    ctx.fillStyle = "black";
+                    ctx.fillText(`You win!`, cvs.width / 2, cvs.height / 2);
+                    resetGame();
+                }, 500);
+            } else if (computerScore > maxCards / 2) {
+                setTimeout(() => {
+                    ctx.clearRect(0, 0, cvs.width, cvs.height);
+                    ctx.font = "4rem Arial";
+                    ctx.textAlign = "center";
+                    ctx.fillStyle = "black";
+                    ctx.fillText(`Computer win!`, cvs.width / 2, cvs.height / 2);
+                    resetGame();
+                }, 500);
+            } else {
+                setTimeout(startNextTurn, 1000);
+            }
+        }
+
+        function resetGame() {
+            // Reset scores and start a new round
+            playerScore = 0;
+            computerScore = 0;
+            startNextTurn();
+        }
+
+        function shuffleArray(array) {
+            // Shuffle the array using the Fisher-Yates algorithm
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        startNextTurn();
+    </script>
+</body>
+</html>

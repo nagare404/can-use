@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script type="text/javascript">
+        const cvs = document.createElement("canvas");
+        cvs.width = window.innerWidth;
+        cvs.height = window.innerHeight;
+        document.getElementById('container').appendChild(cvs);
+        const ctx = cvs.getContext("2d");
+
+        let max_cards = 10;
+        let card_value_array = [];
+        let card_on_field = [];
+
+        isClicked = false;
+        isInteractable = false;
+
+        let goal_number = 0;
+        let player_score = 0;
+        let computer_score = 0;
+        let computer_reaction_time = 2000;
+
+        for (let j = 1; j <= max_cards; j++) {
+            card_value_array.push(j);
+        }
+
+        class Card {
+            constructor (x, y, onClick) {
+                this.x = x;
+                this.y = y;
+                this.width = 100;
+                this.height = 170;
+                this.fillColor = white;
+                this.value = roll();
+                this.onClick = onClick;
+                this.initEventListeners();
+            }
+
+            roll() {               
+                //roll 1 số từ 1 đến max_card
+                let card_value = Math.floor(Math.random() * max_cards) + 1;
+                if (card_value in card_value_array) card_value_array.pop(card_value);
+                return card_value;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.fillStyle = this.fillColor;
+                ctx.strokeStyle = "black";
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
+                ctx.fill();
+                ctx.stroke();
+
+
+                ctx.font = "1rem Arial"; // Changed to rem for flexibility
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillStyle = "black";
+                ctx.fillText(this.value, this.x, this.y);
+            }
+
+            initEventListeners() {
+                window.addEventListener("mousedown", (e) => {
+                    if (this.x < e.clientX && e.clientX < this.x + this.width &&
+                        this.y < e.clientY && e.clientY < this.y + this.height) {
+                            isClicked = true;
+                        }
+
+                    if (isClicked && isInteractable) this.onClick();
+                });
+            }
+        }
+
+
+        function render (show_cards = false) {
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+            // Display game rules
+            let rule_bottom = 50;
+            ctx.font = "2rem Arial";  // Changed to rem for flexibility
+            ctx.textAlign = "center";
+            ctx.fillText(`Pick the card with the number below!`, cvs.width / 2, rule_bottom);
+
+            // Display target number (goal_number)
+            ctx.font = "2rem Arial";  // Changed to rem for flexibility
+            ctx.textAlign = "center";
+            ctx.fillText(`Goal: ${goal_number}`, cvs.width / 2, rule_bottom + 50);
+
+            // Display time counter
+            setTimeout(() => {
+                for (let i = 3; i > 0; i--) {
+                    ctx.font = "2rem Arial";  // Changed to rem for flexibility
+                    ctx.textAlign = "center";
+                    ctx.fillText(`${i}`, cvs.width / 2, cvs.height / 2); 
+                };
+            }, 1000);
+        
+
+            if (show_cards) {           
+                for (let i = 0; i <= max_cards; i++) {
+                    let card = new Card (
+                        cvs.width / max_cards * i + 50,
+                        //một nửa số thẻ đầu ở hàng trên, nửa còn lại ở hàng dưới
+                        i < (max_cards / 2) ? cvs.height / 4 : cvs.height / 4 + this.height + 50, 
+                        () => {
+                            if (isInteractable = false) return; //Không được chơi nếu game chưa interactable
+                            if (this.value ===  goal_number) {
+                                isInteractable = false;
+                                this.fillColor = green; //Nếu người chơi chọn đúng thì thẻ bài ấy sẽ đổi thành màu xanh
+                                card_value_array.pop(this.value);
+                                for (value in card_on_field) {
+                                    if value = this.value;
+                                    card_on_field.pop(card);
+                                }
+                                player_score += 1;
+                                startNextTurn();
+                            } else return;
+                        }
+                    ).draw(ctx);
+                    
+                    card_on_field.push(card);
+                }
+
+                // Vẽ xong hết các lá bài mới cho người chơi tương tác
+                isInteractable = true;
+            }
+        }
+
+        function startNextTurn() {
+            // Set a random value for goal_number
+            goal_number = Math.floor(Math.random() * max_cards) + 1;
+
+            // Display goal_number initially
+            render(false);
+
+            // After 1 second, display the cards 
+            setTimeout(() => {
+                render(true);
+            }, 1000);
+
+            //nếu sau 2 giây mà người chơi không chọn thì máy tính sẽ pick
+            setTimeout(() => {
+                computerPick();
+            }, computer_reaction_time);
+
+            // Check kết quả
+            if (computer_score > max_cards / 2) {
+                clearRect(0, 0, cvs.width, cvs.height);
+                ctx.font = "2rem Arial";  // Changed to rem for flexibility
+                ctx.textAlign = "center";
+                ctx.fillText(`Computer Won!`, cvs.width / 2, rule_bottom);
+            } else if (player_score > max_cards / 2) {
+                clearRect(0, 0, cvs.width, cvs.height);
+                ctx.font = "2rem Arial";  // Changed to rem for flexibility
+                ctx.textAlign = "center";
+                ctx.fillText(`Player Won!`, cvs.width / 2, rule_bottom);
+            } else {
+                clearRect(0, 0, cvs.width, cvs.height);
+                ctx.font = "2rem Arial";  // Changed to rem for flexibility
+                ctx.textAlign = "center";
+                ctx.fillText(`Draw!`, cvs.width / 2, rule_bottom);
+            }
+        }
+
+        function computerPick() {
+            card_on_field.forEach(card => {
+                if (card.value = goal_number) {
+                    card.fillColor = red;
+                    card_value_array.pop(this.value);
+                    for (value in card_on_field) {
+                        if value = this.value;
+                        card_on_field.pop(card);
+                    }
+                    computer_score += 1;
+                    startNextTurn();
+                }
+            });
+            
+        }
+
+    </script>
+</body>
+</html>
