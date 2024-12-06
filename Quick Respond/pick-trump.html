@@ -13,8 +13,7 @@
 </head>
 <body>
     <div id="container"></div>
-    <script type="text/javascript">
-        // Create the canvas and set its dimensions to match the screen
+    <script>
         const cvs = document.createElement("canvas");
         cvs.width = window.innerWidth;
         cvs.height = window.innerHeight;
@@ -24,14 +23,13 @@
         const maxCards = 10;
         const cardValues = Array.from({ length: maxCards }, (_, i) => i + 1);
         const cardsOnField = [];
-
         let pointToWin = 2;
         let goalNumber = 0;
         let playerScore = 0;
         let computerScore = 0;
         let isInteractable = false;
         let isStarted = false;
-        let countdown = 3; // Countdown before the game starts
+        let countdown = 3;
         let computerReactionTime = 1300;
 
         const cardWidth = 100;
@@ -39,7 +37,6 @@
         const cardSpacing = 50;
         const numCardsPerRow = 5;
 
-        // Card class representing individual cards
         class Card {
             constructor(x, y, value) {
                 this.x = x;
@@ -48,15 +45,14 @@
                 this.height = cardHeight;
                 this.value = value;
                 this.color = "white";
-                this.isHovered = false;  // Track if the card is hovered over
+                this.isHovered = false;
             }
 
-            // Draw the card on the canvas
             draw() {
                 ctx.fillStyle = this.color;
                 ctx.fillRect(this.x, this.y, this.width, this.height);
-                ctx.strokeStyle = this.isHovered ? "orange" : "black";  // Change the border color on hover
-                ctx.lineWidth = this.isHovered ? 10 : 1;  // Make the border thicker when hovered
+                ctx.strokeStyle = this.isHovered ? "orange" : "black";
+                ctx.lineWidth = this.isHovered ? 10 : 1;
                 ctx.strokeRect(this.x, this.y, this.width, this.height);
                 ctx.font = "1.5rem Arial";
                 ctx.fillStyle = "black";
@@ -65,7 +61,6 @@
                 ctx.fillText(this.value, this.x + this.width / 2, this.y + this.height / 2);
             }
 
-            // Check if a point is inside the card's area
             isPointInside(x, y) {
                 return (
                     x >= this.x &&
@@ -76,7 +71,6 @@
             }
         }
 
-        // StartButton class for displaying the "Start" button
         class StartButton {
             constructor() {
                 this.x = cvs.width / 2;
@@ -85,7 +79,6 @@
                 this.color = "white";
             }
 
-            // Draw the start button on the canvas
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
@@ -94,7 +87,6 @@
                 ctx.strokeStyle = "black";
                 ctx.lineWidth = 3;
                 ctx.stroke();
-
                 ctx.font = "2rem Arial";
                 ctx.fillStyle = "black";
                 ctx.textAlign = "center";
@@ -102,23 +94,19 @@
                 ctx.fillText("Start", this.x, this.y);
             }
 
-            // Check if the start button is clicked
             isClicked(x, y) {
                 const dx = x - this.x;
                 const dy = y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                return distance <= this.radius;
+                return Math.sqrt(dx * dx + dy * dy) <= this.radius;
             }
         }
 
         const startButton = new StartButton();
 
-        // Main render function for displaying the game state
         function render() {
             ctx.clearRect(0, 0, cvs.width, cvs.height);
 
             if (!isStarted) {
-                // Display the start screen with game rules
                 ctx.font = "2rem Arial";
                 ctx.textAlign = "center";
                 ctx.fillStyle = "black";
@@ -130,11 +118,9 @@
                 startButton.draw();
             } else {
                 if (countdown > 0) {
-                    // Display countdown before the turn starts
                     ctx.font = "3rem Arial";
                     ctx.fillText(countdown, cvs.width / 2, cvs.height / 2);
                 } else {
-                    // Display the game interface with goal number and scores
                     ctx.font = "4rem Arial";
                     ctx.fillText(`Goal: ${goalNumber}`, cvs.width / 2, 150);
                     ctx.font = "2rem Arial";
@@ -148,13 +134,7 @@
             }
         }
 
-        // Initialize a new turn by shuffling cards and setting a new goal number
         function startNextTurn() {
-            if (!isStarted) {
-                render();
-                return;
-            }
-
             goalNumber = Math.floor(Math.random() * maxCards) + 1;
             cardsOnField.length = 0;
             shuffleArray(cardValues);
@@ -194,7 +174,6 @@
             }, 1000);
         }
 
-        // Handle player's pick of a card
         function handlePlayerPick(value) {
             if (value === goalNumber) {
                 playerScore++;
@@ -204,7 +183,6 @@
             }
         }
 
-        // Handle computer's pick of a card
         function handleComputerPick() {
             const targetCard = cardsOnField.find(card => card.value === goalNumber);
             if (targetCard) {
@@ -215,47 +193,32 @@
             checkGameOver();
         }
 
-        // Check if the game is over and reset if necessary
         function checkGameOver() {
             render();
 
-            if (playerScore === pointToWin) {
+            if (playerScore === pointToWin || computerScore === pointToWin) {
+                // Hiển thị thông điệp chiến thắng
                 setTimeout(() => {
                     ctx.clearRect(0, 0, cvs.width, cvs.height);
-                    ctx.font = "4rem Arial";
+                    ctx.font = "3rem Arial";
                     ctx.textAlign = "center";
                     ctx.fillStyle = "black";
-                    ctx.fillText(`You win!`, cvs.width / 2, cvs.height / 2);
-                }, 500); // Show "You win!" for 0.5 seconds
+                    ctx.fillText(
+                        playerScore === pointToWin ? "You Win!" : "Computer Wins!",
+                        cvs.width / 2,
+                        cvs.height / 2
+                    );
+                }, 500);
 
-                // Wait for 2 seconds before resetting the game
-                setTimeout(() => {
-                    resetGame();
-                }, 2500);
-                
-            } else if (computerScore === pointToWin) {
-                setTimeout(() => {
-                    ctx.clearRect(0, 0, cvs.width, cvs.height);
-                    ctx.font = "4rem Arial";
-                    ctx.textAlign = "center";
-                    ctx.fillStyle = "black";
-                    ctx.fillText(`Computer wins!`, cvs.width / 2, cvs.height / 2);
-                }, 500); // Show "Computer wins!" for 0.5 seconds
+        // Đợi một khoảng thời gian trước khi quay lại màn hình start
+        setTimeout(resetGame, 2000);
+    } else {
+        computerReactionTime = Math.max(500, computerReactionTime - 200);
+        setTimeout(startNextTurn, 1000);
+    }
+}
 
-                // Wait for 2 seconds before resetting the game
-                setTimeout(() => {
-                    resetGame();
-                }, 2500);
 
-            // Neither computer nor player has won yet
-            } else {
-                // Càng ngày máy tính càng nhanh
-                computerReactionTime -= 200;
-                setTimeout(startNextTurn, 1000);
-            }
-        }
-
-        // Reset the game state for a new round
         function resetGame() {
             playerScore = 0;
             computerScore = 0;
@@ -264,7 +227,6 @@
             render();
         }
 
-        // Shuffle array helper function
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -272,7 +234,6 @@
             }
         }
 
-        // Global mousedown event listener
         document.addEventListener("mousedown", (e) => {
             const mouseX = e.clientX;
             const mouseY = e.clientY;
@@ -288,25 +249,28 @@
             if (isInteractable) {
                 cardsOnField.forEach(card => {
                     if (card.isPointInside(mouseX, mouseY)) {
-                        if (card.value === goalNumber) {
-                            handlePlayerPick(card.value);
-                        }
+                        handlePlayerPick(card.value);
                     }
                 });
             }
         });
 
-        // Global mousemove event listener for hover effect
         document.addEventListener("mousemove", (e) => {
             const mouseX = e.clientX;
             const mouseY = e.clientY;
+
+            let hoverChanged = false;
             cardsOnField.forEach(card => {
-                card.isHovered = card.isPointInside(mouseX, mouseY);
+                const isHoveredNow = card.isPointInside(mouseX, mouseY);
+                if (card.isHovered !== isHoveredNow) {
+                    card.isHovered = isHoveredNow;
+                    hoverChanged = true;
+                }
             });
-            render();  // Redraw to apply hover effect
+
+            if (hoverChanged) render();
         });
 
-        // Initial call to start the game
         render();
     </script>
 </body>
