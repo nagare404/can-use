@@ -14,25 +14,32 @@
 <body>
     <div id="container"></div>
     <script type="text/javascript">
+        // Create the canvas and set its dimensions to match the screen
         const cvs = document.createElement("canvas");
         cvs.width = window.innerWidth;
         cvs.height = window.innerHeight;
         document.getElementById('container').appendChild(cvs);
         const ctx = cvs.getContext("2d");
+
         const maxCards = 10;
-        const cardValues = Array.from({ length: maxCards }, (_, i) => i + 1); // [1, 2, ..., 10]
+        const cardValues = Array.from({ length: maxCards }, (_, i) => i + 1);
         const cardsOnField = [];
+
+        let pointToWin = 1;
         let goalNumber = 0;
         let playerScore = 0;
         let computerScore = 0;
         let isInteractable = false;
-        let countdown = 3; // Countdown from 3
+        let isStarted = false;
+        let countdown = 3; // Countdown before the game starts
         let computerReactionTime = 1500;
+
         const cardWidth = 100;
         const cardHeight = 150;
         const cardSpacing = 50;
         const numCardsPerRow = 5;
 
+        // Card class representing individual cards
         class Card {
             constructor(x, y, value, onClick) {
                 this.x = x;
@@ -45,8 +52,8 @@
                 this.initEventListeners();
             }
 
+            // Draw the card on the canvas
             draw() {
-                // Draw the card with its color and value
                 ctx.fillStyle = this.color;
                 ctx.fillRect(this.x, this.y, this.width, this.height);
                 ctx.strokeStyle = "black";
@@ -58,8 +65,8 @@
                 ctx.fillText(this.value, this.x + this.width / 2, this.y + this.height / 2);
             }
 
+            // Initialize event listeners for card clicks
             initEventListeners() {
-                // Set up mouse click event listener for interacting with cards
                 window.addEventListener("mousedown", (e) => {
                     if (
                         e.clientX >= this.x &&
@@ -74,55 +81,113 @@
             }
         }
 
-        function render() {
-            // Clear the canvas before rendering
-            ctx.clearRect(0, 0, cvs.width, cvs.height);
-            if (countdown > 0) {
-                // Display the countdown
-                ctx.font = "3rem Arial";
-                ctx.textAlign = "center";
-                ctx.fillStyle = "black";
-                ctx.fillText(countdown, cvs.width / 2, cvs.height / 2);
-            } else {
-                // Display the goal number and scores
-                ctx.textAlign = "center";
-                ctx.fillStyle = "black";
-                ctx.font = "4rem Arial";
-                ctx.fillText(`Goal: ${goalNumber}`, cvs.width / 2, 150);
+        // StartButton class for displaying the "Start" button
+        class StartButton {
+            constructor() {
+                this.x = cvs.width / 2;
+                this.y = cvs.height * 0.75;
+                this.radius = 50;
+                this.color = "white";
+                this.initEventListeners();
+            }
+
+            // Draw the start button on the canvas
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
                 ctx.font = "2rem Arial";
-                ctx.fillText(`Player: ${playerScore} - Computer: ${computerScore}`, cvs.width / 2, 50);
-                // Draw all the cards on the field
-                cardsOnField.forEach(card => card.draw());
+                ctx.fillStyle = "black";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("Start", this.x, this.y);
+            }
+
+            // Initialize event listeners for the "Start" button click
+            initEventListeners() {
+                window.addEventListener("mousedown", (e) => {
+                    const dx = e.clientX - this.x;
+                    const dy = e.clientY - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance <= this.radius && !isStarted) {
+                        isStarted = true;
+                        startNextTurn();
+                    }
+                });
             }
         }
 
+        // Main render function for displaying the game state
+        function render() {
+            ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+            if (!isStarted) {
+                // Display the start screen with game rules
+                ctx.font = "2rem Arial";
+                ctx.textAlign = "center";
+                ctx.fillStyle = "black";
+                ctx.fillText(
+                    `Pick the card with the same value as the goal number. Reach ${pointToWin} points first to win!`,
+                    cvs.width / 2,
+                    cvs.height * 0.25
+                );
+
+                const startButton = new StartButton();
+                startButton.draw();
+            } else {
+                if (countdown > 0) {
+                    // Display countdown before the turn starts
+                    ctx.font = "3rem Arial";
+                    ctx.fillText(countdown, cvs.width / 2, cvs.height / 2);
+                } else {
+                    // Display the game interface with goal number and scores
+                    ctx.font = "4rem Arial";
+                    ctx.fillText(`Goal: ${goalNumber}`, cvs.width / 2, 150);
+                    ctx.font = "2rem Arial";
+                    ctx.fillText(
+                        `Player: ${playerScore} - Computer: ${computerScore}`,
+                        cvs.width / 2,
+                        50
+                    );
+                    cardsOnField.forEach((card) => card.draw());
+                }
+            }
+        }
+
+        // Initialize a new turn by shuffling cards and setting a new goal number
         function startNextTurn() {
+            if (!isStarted) {
+                render();
+                return;
+            }
+
             goalNumber = Math.floor(Math.random() * maxCards) + 1;
             cardsOnField.length = 0;
             shuffleArray(cardValues);
-            // Distribute cards in two rows, centered on the canvas.
+
             cardValues.forEach((value, index) => {
-                // Determine the row and column of the current card.
                 const row = Math.floor(index / numCardsPerRow);
                 const col = index % numCardsPerRow;
-                // Calculate the total width of a row, including spacing between cards.
-                const totalRowWidth = numCardsPerRow * cardWidth + (numCardsPerRow - 1) * cardSpacing; // 5 cards and 4 spaces
-                // Find the starting X position to center the row on the canvas.
+                const totalRowWidth = numCardsPerRow * cardWidth + (numCardsPerRow - 1) * cardSpacing;
                 const canvasCenterX = cvs.width / 2;
                 const startX = canvasCenterX - totalRowWidth / 2;
-                // Calculate the total height of two rows, including spacing.
-                const totalRowsHeight = 2 * cardHeight + cardSpacing; // 2 rows, 1 space
-                // Find the starting Y position to center the rows on the canvas.
+                const totalRowsHeight = 2 * cardHeight + cardSpacing;
                 const canvasCenterY = cvs.height / 2;
                 const startY = canvasCenterY - totalRowsHeight / 2;
-                // Compute the exact X and Y coordinates for the card.
                 const x = startX + col * (cardWidth + cardSpacing);
                 const y = startY + row * (cardHeight + cardSpacing);
-                // Create a new card
+
                 cardsOnField.push(new Card(x, y, value, () => handlePlayerPick(value)));
             });
+
             isInteractable = false;
             countdown = 4;
+
             const countdownInterval = setInterval(() => {
                 if (countdown === 0) {
                     clearInterval(countdownInterval);
@@ -141,8 +206,8 @@
             }, 1000);
         }
 
+        // Handle player's pick of a card
         function handlePlayerPick(value) {
-            // Handle player's pick and check if the chosen card is the goal number
             if (value === goalNumber) {
                 playerScore++;
                 cardsOnField.find(card => card.value === value).color = "green";
@@ -151,8 +216,8 @@
             }
         }
 
+        // Handle computer's pick of a card
         function handleComputerPick() {
-            // Handle computer's pick and check if it matches the goal number
             const targetCard = cardsOnField.find(card => card.value === goalNumber);
             if (targetCard) {
                 targetCard.color = "red";
@@ -162,49 +227,63 @@
             checkGameOver();
         }
 
+        // Check if the game is over and reset if necessary
         function checkGameOver() {
             render();
-            // Check if either player has won
-            if (playerScore > maxCards / 2) {
+
+            if (playerScore === pointToWin) {
                 setTimeout(() => {
                     ctx.clearRect(0, 0, cvs.width, cvs.height);
                     ctx.font = "4rem Arial";
                     ctx.textAlign = "center";
                     ctx.fillStyle = "black";
                     ctx.fillText(`You win!`, cvs.width / 2, cvs.height / 2);
-                    resetGame();
                 }, 500);
-            } else if (computerScore > maxCards / 2) {
+
+                // Chờ 2 giây để hiển thị thông báo trước khi reset
+                setTimeout(() => {
+                    resetGame();
+                }, 2500);
+
+            } else if (computerScore === pointToWin) {
                 setTimeout(() => {
                     ctx.clearRect(0, 0, cvs.width, cvs.height);
                     ctx.font = "4rem Arial";
                     ctx.textAlign = "center";
                     ctx.fillStyle = "black";
-                    ctx.fillText(`Computer win!`, cvs.width / 2, cvs.height / 2);
-                    resetGame();
+                    ctx.fillText(`Computer wins!`, cvs.width / 2, cvs.height / 2);
                 }, 500);
+
+                // Chờ 2 giây để hiển thị thông báo trước khi reset
+                setTimeout(() => {
+                    resetGame();
+                }, 2500);
+
+            // Neither computer nor player has won yet
             } else {
                 setTimeout(startNextTurn, 1000);
             }
         }
 
+        // Reset the game to its initial state
         function resetGame() {
-            // Reset scores and start a new round
+            isStarted = false;
             playerScore = 0;
             computerScore = 0;
             computerReactionTime = 1500;
-            startNextTurn();
+            render();
         }
 
+        // Shuffle the cards using Fisher-Yates algorithm
         function shuffleArray(array) {
-            // Shuffle the array using the Fisher-Yates algorithm
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
 
-        startNextTurn();
+        // Start rendering the initial screen
+        render();
     </script>
 </body>
 </html>
