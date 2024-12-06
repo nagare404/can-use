@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reaction Time Game</title>
     <style>
+        /* Ensure the canvas fills the screen */
         body {
             margin: 0;
             overflow: hidden;
@@ -12,52 +13,56 @@
     </style>
 </head>
 <body>
+    <!-- Container for the game canvas -->
     <div id="container"></div>
-    <script type="text/javascript">
-        // Create the canvas and set its dimensions to match the screen
+    <script>
+        // Create and set up the canvas
         const cvs = document.createElement("canvas");
         cvs.width = window.innerWidth;
         cvs.height = window.innerHeight;
         document.getElementById('container').appendChild(cvs);
         const ctx = cvs.getContext("2d");
 
+        // Game configuration
         const maxCards = 10;
         const cardValues = Array.from({ length: maxCards }, (_, i) => i + 1);
         const cardsOnField = [];
-
-        let pointToWin = 1;
+        let pointToWin = 2; // Points required to win
         let goalNumber = 0;
         let playerScore = 0;
         let computerScore = 0;
         let isInteractable = false;
         let isStarted = false;
-        let countdown = 3; // Countdown before the game starts
-        let computerReactionTime = 1500;
+        let countdown = 3; // Countdown timer before interaction
+        let computerReactionTime = 1300; // Reaction time for the computer in milliseconds
 
+        // Card layout dimensions
         const cardWidth = 100;
         const cardHeight = 150;
         const cardSpacing = 50;
         const numCardsPerRow = 5;
 
-        // Card class representing individual cards
+        // Card class to represent each card on the field
         class Card {
-            constructor(x, y, value, onClick) {
+            constructor(x, y, value) {
                 this.x = x;
                 this.y = y;
                 this.width = cardWidth;
                 this.height = cardHeight;
                 this.value = value;
                 this.color = "white";
-                this.onClick = onClick;
-                this.initEventListeners();
+                this.isHovered = false; // Check if the card is hovered over
             }
 
             // Draw the card on the canvas
             draw() {
                 ctx.fillStyle = this.color;
                 ctx.fillRect(this.x, this.y, this.width, this.height);
-                ctx.strokeStyle = "black";
+                ctx.strokeStyle = this.isHovered ? "orange" : "black";
+                ctx.lineWidth = this.isHovered ? 10 : 1;
                 ctx.strokeRect(this.x, this.y, this.width, this.height);
+
+                // Draw the card value
                 ctx.font = "1.5rem Arial";
                 ctx.fillStyle = "black";
                 ctx.textAlign = "center";
@@ -65,33 +70,27 @@
                 ctx.fillText(this.value, this.x + this.width / 2, this.y + this.height / 2);
             }
 
-            // Initialize event listeners for card clicks
-            initEventListeners() {
-                window.addEventListener("mousedown", (e) => {
-                    if (
-                        e.clientX >= this.x &&
-                        e.clientX <= this.x + this.width &&
-                        e.clientY >= this.y &&
-                        e.clientY <= this.y + this.height &&
-                        isInteractable
-                    ) {
-                        this.onClick();
-                    }
-                });
+            // Check if a point (x, y) is inside the card
+            isPointInside(x, y) {
+                return (
+                    x >= this.x &&
+                    x <= this.x + this.width &&
+                    y >= this.y &&
+                    y <= this.y + this.height
+                );
             }
         }
 
-        // StartButton class for displaying the "Start" button
+        // Start button class for the initial screen
         class StartButton {
             constructor() {
                 this.x = cvs.width / 2;
                 this.y = cvs.height * 0.75;
                 this.radius = 50;
                 this.color = "white";
-                this.initEventListeners();
             }
 
-            // Draw the start button on the canvas
+            // Draw the start button
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
@@ -100,7 +99,6 @@
                 ctx.strokeStyle = "black";
                 ctx.lineWidth = 3;
                 ctx.stroke();
-
                 ctx.font = "2rem Arial";
                 ctx.fillStyle = "black";
                 ctx.textAlign = "center";
@@ -108,26 +106,22 @@
                 ctx.fillText("Start", this.x, this.y);
             }
 
-            // Initialize event listeners for the "Start" button click
-            initEventListeners() {
-                window.addEventListener("mousedown", (e) => {
-                    const dx = e.clientX - this.x;
-                    const dy = e.clientY - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance <= this.radius && !isStarted) {
-                        isStarted = true;
-                        startNextTurn();
-                    }
-                });
+            // Check if the button is clicked
+            isClicked(x, y) {
+                const dx = x - this.x;
+                const dy = y - this.y;
+                return Math.sqrt(dx * dx + dy * dy) <= this.radius;
             }
         }
 
-        // Main render function for displaying the game state
+        const startButton = new StartButton();
+
+        // Render the game elements
         function render() {
             ctx.clearRect(0, 0, cvs.width, cvs.height);
 
+            // Display initial screen with instructions and start button
             if (!isStarted) {
-                // Display the start screen with game rules
                 ctx.font = "2rem Arial";
                 ctx.textAlign = "center";
                 ctx.fillStyle = "black";
@@ -136,16 +130,15 @@
                     cvs.width / 2,
                     cvs.height * 0.25
                 );
-
-                const startButton = new StartButton();
                 startButton.draw();
             } else {
+                // Game phase
                 if (countdown > 0) {
-                    // Display countdown before the turn starts
+                    // Display countdown timer
                     ctx.font = "3rem Arial";
                     ctx.fillText(countdown, cvs.width / 2, cvs.height / 2);
                 } else {
-                    // Display the game interface with goal number and scores
+                    // Display goal number and scores
                     ctx.font = "4rem Arial";
                     ctx.fillText(`Goal: ${goalNumber}`, cvs.width / 2, 150);
                     ctx.font = "2rem Arial";
@@ -154,22 +147,20 @@
                         cvs.width / 2,
                         50
                     );
+                    // Draw all cards
                     cardsOnField.forEach((card) => card.draw());
                 }
             }
         }
 
-        // Initialize a new turn by shuffling cards and setting a new goal number
+        // Start the next round
         function startNextTurn() {
-            if (!isStarted) {
-                render();
-                return;
-            }
-
+            // Randomly select a goal number
             goalNumber = Math.floor(Math.random() * maxCards) + 1;
-            cardsOnField.length = 0;
-            shuffleArray(cardValues);
+            cardsOnField.length = 0; // Clear current cards
+            shuffleArray(cardValues); // Shuffle card values
 
+            // Arrange cards on the canvas
             cardValues.forEach((value, index) => {
                 const row = Math.floor(index / numCardsPerRow);
                 const col = index % numCardsPerRow;
@@ -182,23 +173,23 @@
                 const x = startX + col * (cardWidth + cardSpacing);
                 const y = startY + row * (cardHeight + cardSpacing);
 
-                cardsOnField.push(new Card(x, y, value, () => handlePlayerPick(value)));
+                cardsOnField.push(new Card(x, y, value));
             });
 
-            isInteractable = false;
-            countdown = 4;
+            isInteractable = false; // Temporarily disable interaction
+            countdown = 3; // Reset countdown timer
 
+            // Countdown logic
             const countdownInterval = setInterval(() => {
                 if (countdown === 0) {
                     clearInterval(countdownInterval);
                     render();
-                    isInteractable = true;
+                    isInteractable = true; // Enable interaction
                     setTimeout(() => {
                         if (isInteractable) {
-                            handleComputerPick();
+                            handleComputerPick(); // Computer attempts to pick
                         }
                     }, computerReactionTime);
-                    computerReactionTime -= 200;
                 } else {
                     countdown--;
                     render();
@@ -206,7 +197,7 @@
             }, 1000);
         }
 
-        // Handle player's pick of a card
+        // Handle player's card selection
         function handlePlayerPick(value) {
             if (value === goalNumber) {
                 playerScore++;
@@ -216,7 +207,7 @@
             }
         }
 
-        // Handle computer's pick of a card
+        // Handle computer's card selection
         function handleComputerPick() {
             const targetCard = cardsOnField.find(card => card.value === goalNumber);
             if (targetCard) {
@@ -227,54 +218,42 @@
             checkGameOver();
         }
 
-        // Check if the game is over and reset if necessary
+        // Check if the game is over and handle end conditions
         function checkGameOver() {
             render();
 
-            if (playerScore === pointToWin) {
+            if (playerScore === pointToWin || computerScore === pointToWin) {
+                // Display victory message
                 setTimeout(() => {
                     ctx.clearRect(0, 0, cvs.width, cvs.height);
-                    ctx.font = "4rem Arial";
+                    ctx.font = "3rem Arial";
                     ctx.textAlign = "center";
                     ctx.fillStyle = "black";
-                    ctx.fillText(`You win!`, cvs.width / 2, cvs.height / 2);
-                }, 500);
+                    ctx.fillText(
+                        playerScore === pointToWin ? "You Win!" : "Computer Wins!",
+                        cvs.width / 2,
+                        cvs.height / 2
+                    );
+                }, 1500);
 
-                // Chờ 2 giây để hiển thị thông báo trước khi reset
-                setTimeout(() => {
-                    resetGame();
-                }, 2500);
-
-            } else if (computerScore === pointToWin) {
-                setTimeout(() => {
-                    ctx.clearRect(0, 0, cvs.width, cvs.height);
-                    ctx.font = "4rem Arial";
-                    ctx.textAlign = "center";
-                    ctx.fillStyle = "black";
-                    ctx.fillText(`Computer wins!`, cvs.width / 2, cvs.height / 2);
-                }, 500);
-
-                // Chờ 2 giây để hiển thị thông báo trước khi reset
-                setTimeout(() => {
-                    resetGame();
-                }, 2500);
-
-            // Neither computer nor player has won yet
+                // Wait before returning to start screen
+                setTimeout(resetGame, 2000);
             } else {
+                computerReactionTime = Math.max(500, computerReactionTime - 200); // Adjust computer speed
                 setTimeout(startNextTurn, 1000);
             }
         }
 
-        // Reset the game to its initial state
+        // Reset the game to the initial state
         function resetGame() {
-            isStarted = false;
             playerScore = 0;
             computerScore = 0;
-            computerReactionTime = 1500;
+            computerReactionTime = 1300;
+            isStarted = false;
             render();
         }
 
-        // Shuffle the cards using Fisher-Yates algorithm
+        // Shuffle an array (Fisher-Yates algorithm)
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -282,7 +261,32 @@
             }
         }
 
-        // Start rendering the initial screen
+        // Event listener for mouse clicks
+        document.addEventListener("mousedown", (e) => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            if (!isStarted) {
+                if (startButton.isClicked(mouseX, mouseY)) {
+                    isStarted = true;
+                    startNextTurn();
+                }
+            } else if (isInteractable && countdown === 0) {
+                const selectedCard = cardsOnField.find(card => card.isPointInside(mouseX, mouseY));
+                if (selectedCard) handlePlayerPick(selectedCard.value);
+            }
+        });
+
+        // Update hover state based on mouse movement
+        document.addEventListener("mousemove", (e) => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            cardsOnField.forEach(card => {
+                card.isHovered = card.isPointInside(mouseX, mouseY);
+            });
+            render();
+        });
+
         render();
     </script>
 </body>
