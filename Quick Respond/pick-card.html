@@ -114,6 +114,7 @@
             }
         }
 
+        //initiate startButon
         const startButton = new StartButton();
 
         // Render the game elements
@@ -176,7 +177,7 @@
                 cardsOnField.push(new Card(x, y, value));
             });
 
-            isInteractable = false; // Temporarily disable interaction
+            isInteractable = false; // Player cant interact when countdown hasnt stopped
             countdown = 3; // Reset countdown timer
 
             // Countdown logic
@@ -184,10 +185,10 @@
                 if (countdown === 0) {
                     clearInterval(countdownInterval);
                     render();
-                    isInteractable = true; // Enable interaction
+                    isInteractable = true; // Game started now
                     setTimeout(() => {
                         if (isInteractable) {
-                            handleComputerPick(); // Computer attempts to pick
+                            handleComputerPick(); // Computer will pick if players dont pick card in time
                         }
                     }, computerReactionTime);
                 } else {
@@ -214,7 +215,7 @@
                 targetCard.color = "red";
                 computerScore++;
             }
-            isInteractable = false;
+            isInteractable = false; //Player cant pick after computer has picked
             checkGameOver();
         }
 
@@ -249,7 +250,7 @@
             playerScore = 0;
             computerScore = 0;
             computerReactionTime = 1300;
-            isStarted = false;
+            isStarted = false; // Return to start screen 
             render();
         }
 

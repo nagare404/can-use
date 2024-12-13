@@ -1,0 +1,68 @@
+/* Ensure the canvas fills the screen */
+/* body {
+    margin: 0;
+    overflow: hidden;
+    background-image: url('Tifa.jpg'); 
+    background-size: cover; 
+    background-repeat: no-repeat; 
+    background-position: center; 
+} */
+
+/* Ensure the canvas fills the screen */
+body {
+    margin: 0;
+    overflow: hidden;
+    background-image: url('Tifa.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    font-family: Arial, sans-serif;
+}
+
+.game-rule, .goal-number, .button-instruction {
+    position: absolute;
+    z-index: 1000;
+    font-size: 2rem;
+    color: black;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.game-rule {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.goal-number {
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.button-instruction {
+    bottom: 180px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.game-result {
+    position: absolute;
+    font-size: 2rem;
+    color: black;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.game-result p {
+    margin: 10px 0;
+}
+
+button {
+    padding: 10px;
+    margin: 5px;
+    font-size: 15rem;
+}
