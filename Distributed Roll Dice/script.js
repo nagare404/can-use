@@ -200,7 +200,6 @@ cvs.width = window.innerWidth;
 cvs.height = window.innerHeight;
 document.body.appendChild(cvs);
 const ctx = cvs.getContext("2d");
-
 let number_of_dices_of_player = 0;
 let number_of_dices_of_computer = 0;
 const maxDices = 3;
@@ -218,20 +217,18 @@ class Dice {
         this.fillColor = "white";
         this.value = this.roll();
     }
-
     roll() {
         return Math.floor(Math.random() * 6) + 1;
     }
-
     draw(ctx) {
         ctx.clearRect(this.x, this.y, this.width, this.height);
         ctx.strokeRect(this.x, this.y, this.width, this.height);
         ctx.fillStyle = this.fillColor;
         ctx.fillRect(this.x, this.y, this.width, this.height);
-        ctx.font = "1.5rem Arial";  
+        ctx.font = "1.5rem Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillStyle = "black"; 
+        ctx.fillStyle = "black";
         ctx.fillText(
             this.value,
             this.x + this.width / 2,
@@ -249,7 +246,6 @@ class Button {
         this.onClick = onClick;
         this.initEventListeners();
     }
-
     draw(ctx) {
         ctx.beginPath();
         ctx.fillStyle = "rgb(0, 255, 0)";
@@ -257,13 +253,12 @@ class Button {
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-        ctx.font = "1rem Arial"; 
+        ctx.font = "1rem Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillStyle = "black";
         ctx.fillText(this.label, this.x, this.y);
     }
-
     initEventListeners() {
         window.addEventListener("mousedown", (e) => {
             const dx = this.x - e.clientX;
@@ -291,11 +286,10 @@ function compare(computer_value, player_value, goal_number) {
 
 function render(showButtons = false) {
     ctx.clearRect(0, 0, cvs.width, cvs.height);
-
     // Display game rules
     let ruleDiv = document.createElement('div');
     ruleDiv.classList.add('game-rule');
-    ruleDiv.textContent = 'If your result is closer to the goal than computer\'s, you win!';
+    ruleDiv.textContent = `If your result is closer to the goal than computer's, you win!`;
     document.body.appendChild(ruleDiv);
 
     // Display goal number
@@ -304,10 +298,10 @@ function render(showButtons = false) {
     goalDiv.textContent = `Goal: ${goal_number}`;
     document.body.appendChild(goalDiv);
 
-    // Xóa dòng chữ hướng dẫn nếu nó đã tồn tại trước đó
+    // Remove instruction text if it already exists
     let buttonTextDiv = document.querySelector('.button-instruction');
     if (buttonTextDiv) {
-        buttonTextDiv.remove(); // Xóa dòng chữ hướng dẫn
+        buttonTextDiv.remove(); // Remove the instruction text
     }
 
     // Draw buttons if showButtons is true
@@ -316,7 +310,7 @@ function render(showButtons = false) {
         buttonTextDiv.classList.add('button-instruction');
         buttonTextDiv.textContent = `Select number of dices you want to use:`;
         document.body.appendChild(buttonTextDiv);
-        
+
         for (let i = 1; i <= maxDices; i++) {
             new Button(
                 (cvs.width / (maxDices + 1)) * i,
@@ -324,30 +318,25 @@ function render(showButtons = false) {
                 50,
                 `${i} Dice(s)`,
                 () => {
-                    if (isInteractable === false) return; 
+                    if (isInteractable === false) return;
                     number_of_dices_of_player = i;
-                    isInteractable = false; 
-                    render(false);  // Vẽ lại mà không có nút và dòng chữ
+                    isInteractable = false;
+                    render(false);  // Redraw without buttons and instructions
                     startPlayerGame();
                 }
             ).draw(ctx);
         }
-
-        isInteractable = true; 
+        isInteractable = true;
     }
 }
-
 
 function startGame() {
     goal_number = Math.floor(Math.random() * 18) + 1;
     render(false);
-
     setTimeout(() => {
         render(true);
     }, 1000);
-
     number_of_dices_of_computer = goal_number < 8 ? 1 : goal_number < 14 ? 2 : 3;
-
     computerDices = Array.from({ length: number_of_dices_of_computer }, (_, i) =>
         new Dice(50 + i * 120, cvs.height / 2 - 150)
     );
@@ -358,38 +347,34 @@ function startPlayerGame() {
     for (let i = 0; i < number_of_dices_of_player; i++) {
         playerDices.push(new Dice(50 + i * 120, cvs.height / 2));
     }
-
     rollAllDices(playerDices);
     rollAllDices(computerDices);
-
     let playerSum = 0;
     playerDices.forEach((dice) => {
         playerSum += dice.value;
     });
-
     let computerSum = 0;
     computerDices.forEach((dice) => {
         computerSum += dice.value;
     });
-
     const result = compare(computerSum, playerSum, goal_number);
 
-    // Tạo divs cho "You" và "Computer" ở vị trí tương ứng với xúc xắc
+    // Create divs for "You" and "Computer" at corresponding dice positions
     let playerDiv = document.createElement('div');
     playerDiv.classList.add('game-result');
     playerDiv.innerHTML = `You: ${playerSum}`;
-    playerDiv.style.left = '500px';
+    playerDiv.style.left = '510px';
     playerDiv.style.top = `${cvs.height / 2 + 50}px`;
     document.body.appendChild(playerDiv);
 
     let computerDiv = document.createElement('div');
     computerDiv.classList.add('game-result');
     computerDiv.innerHTML = `Computer: ${computerSum}`;
-    computerDiv.style.left = '500px';
+    computerDiv.style.left = '510px';
     computerDiv.style.top = `${cvs.height / 2 - 100}px`;
     document.body.appendChild(computerDiv);
 
-    // Tạo div cho kết quả, căn giữa màn hình
+    // Create div for result, centered on the screen
     let resultDiv = document.createElement('div');
     resultDiv.classList.add('game-result');
     resultDiv.innerHTML = result;
@@ -397,7 +382,7 @@ function startPlayerGame() {
     resultDiv.style.top = `${cvs.height / 2}px`;
     document.body.appendChild(resultDiv);
 
-    // Xóa kết quả sau 3 giây và bắt đầu lại game
+    // Remove results after 3 seconds and restart the game
     setTimeout(() => {
         startGame();
         playerDiv.remove();
@@ -406,5 +391,5 @@ function startPlayerGame() {
     }, 3000);
 }
 
-
 startGame();
+
