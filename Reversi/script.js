@@ -22,6 +22,9 @@ toastr.options = {
 // ターンを示す変数
 let isOddTurn = true;
 
+// AI対戦モードのフラグ
+let isAIMode = false;
+
 /*****************************************
  * イベント
  *****************************************/
@@ -32,6 +35,9 @@ $(function () {
     // 初期化ボタンを押したときのイベント
     $("#btn-initialize").click(initializeEvent);
 
+    // AIモード切り替えボタンのイベント
+    $("#btn-toggle-ai").click(toggleAIMode);
+
     // 盤面を初期化する
     initializeEvent();
 });
@@ -40,7 +46,6 @@ $(function () {
  * マス目クリックイベント
  */
 function clickSquareEvent() {
-    // クリックされたマス目のオブジェクトを取得する
     let square = $(this);
 
     // クリックされたマス目が選択できない場合はスキップ
@@ -48,7 +53,39 @@ function clickSquareEvent() {
         return;
     }
 
-    // ターン表示を削除する
+    handleMove(square);
+}
+
+/**
+ * AIの動作
+ */
+function aiMove() {
+    if (!isAIMode || isOddTurn) return; // AIモードがオフまたは黒のターンならスキップ
+
+    let bestSquare = null;
+    let maxFlips = 0;
+
+    // 全マスをスキャン
+    $(".square").each(function () {
+        let square = $(this);
+        if (canSelect(square)) {
+            let flips = countFlips(square);
+            if (flips > maxFlips) {
+                maxFlips = flips;
+                bestSquare = square;
+            }
+        }
+    });
+
+    if (bestSquare) {
+        handleMove(bestSquare);
+    }
+}
+
+/**
+ * 駒を置く処理
+ */
+function handleMove(square) {
     toastr.remove();
 
     // マスの所有者を変更する
@@ -62,11 +99,7 @@ function clickSquareEvent() {
 
     // 次のターンに選択できるマスが存在しない場合
     if (isPass()) {
-        // エラーメッセージを表示する
-        toastr.remove();
         toastr.error(getTurnString() + "には選択できるマスがありません。");
-
-        // 次のターンに変更する
         changeTurn();
         if (isPass()) {
             toastr.error(getTurnString() + "には選択できるマスがありません。");
@@ -74,14 +107,69 @@ function clickSquareEvent() {
         } else {
             setTimeout(function () {
                 toastr.info(getTurnString() + "の番です。");
+                aiMove(); // AIがパス後に再度動作
             }, 1000);
         }
-
         return;
     }
 
-    // 次のターンを示すメッセージを表示する
     toastr.info(getTurnString() + "の番です。");
+    aiMove(); // 次のターンでAIが動作
+}
+
+/**
+ * AIモード切り替えイベント
+ */
+function toggleAIMode() {
+    isAIMode = !isAIMode;
+    toastr.info("AI対戦モード: " + (isAIMode ? "オン" : "オフ"));
+    if (isAIMode && !isOddTurn) {
+        aiMove(); // AIモードがオンの場合、白のターンなら即時動作
+    }
+}
+
+/**
+ * 石を置いた場合に反転する数を数える
+ */
+function countFlips(square) {
+    let totalFlips = 0;
+
+    // 各方向の反転数を合計
+    totalFlips += countFlipsDirection(square, getPosOppositeUpper);
+    totalFlips += countFlipsDirection(square, getPosOppositeLower);
+    totalFlips += countFlipsDirection(square, getPosOppositeLeft);
+    totalFlips += countFlipsDirection(square, getPosOppositeRight);
+    totalFlips += countFlipsDirection(square, getPosOppositeUpperLeft);
+    totalFlips += countFlipsDirection(square, getPosOppositeUpperRight);
+    totalFlips += countFlipsDirection(square, getPosOppositeLowerLeft);
+    totalFlips += countFlipsDirection(square, getPosOppositeLowerRight);
+
+    return totalFlips;
+}
+
+/**
+ * 指定方向で反転する数を数える
+ */
+function countFlipsDirection(square, getPosOpposite) {
+    let row = square.data("row");
+    let col = square.data("col");
+    let endPos = getPosOpposite(row, col);
+
+    if (!endPos) return 0;
+
+    let count = 0;
+    let dRow = endPos.row > row ? 1 : endPos.row < row ? -1 : 0;
+    let dCol = endPos.col > col ? 1 : endPos.col < col ? -1 : 0;
+
+    for (
+        let r = row + dRow, c = col + dCol;
+        r !== endPos.row || c !== endPos.col;
+        r += dRow, c += dCol
+    ) {
+        count++;
+    }
+
+    return count;
 }
 
 /**
