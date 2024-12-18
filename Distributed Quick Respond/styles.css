@@ -2,7 +2,7 @@
 body {
     margin: 0;
     overflow: hidden;
-    background-image: url('Tifa.jpg'); /* Đường dẫn đến hình nền */
+    background-image: url('Background.jpg'); /* Đường dẫn đến hình nền */
     background-size: cover; /* Phóng to hình nền để bao phủ toàn bộ màn hình */
     background-repeat: no-repeat; /* Không lặp lại hình nền */
     background-position: center; /* Đặt hình nền ở giữa màn hình */
