@@ -9,12 +9,13 @@ const ctx = cvs.getContext("2d");
 const maxCards = 10;
 const cardValues = Array.from({ length: maxCards }, (_, i) => i + 1);
 const cardsOnField = [];
-let pointToWin = 2; // Points required to win
+let pointToWin = 1; // Points required to win
 let goalNumber = 0;
 let playerScore = 0;
 let computerScore = 0;
 let isInteractable = false;
 let isStarted = false;
+let gameOver = false; // Add a game over state
 let countdown = 3; // Countdown timer before interaction
 let computerReactionTime = 1300; // Reaction time for the computer in milliseconds
 
@@ -67,7 +68,7 @@ class Card {
 class StartButton {
     constructor() {
         this.x = cvs.width / 2;
-        this.y = cvs.height * 0.75;
+        this.y = cvs.height * 0.75 + 100;
         this.radius = 50;
         this.color = "white";
     }
@@ -96,14 +97,26 @@ class StartButton {
     }
 }
 
-//initiate startButon
+// Initialize start button
 const startButton = new StartButton();
+
+// Load the Standby image
+const standbyImage = new Image();
+standbyImage.src = "Standby.jpg";
+
+// Render Standby.jpg
+function renderStandbyImage() {
+    const imgWidth = 300;
+    const imgHeight = 400;
+    const imgX = cvs.width / 2 - imgWidth / 2;
+    const imgY = cvs.height / 2 - imgHeight / 2; // Above the start button
+    ctx.drawImage(standbyImage, imgX, imgY, imgWidth, imgHeight);
+}
 
 // Render the game elements
 function render() {
+    if (gameOver) return; // Prevent further rendering during game over
     ctx.clearRect(0, 0, cvs.width, cvs.height);
-
-    // Display initial screen with instructions and start button
     if (!isStarted) {
         ctx.font = "2rem Arial";
         ctx.textAlign = "center";
@@ -111,17 +124,15 @@ function render() {
         ctx.fillText(
             `Pick the card with the same value as the goal number. Reach ${pointToWin} points first to win!`,
             cvs.width / 2,
-            cvs.height * 0.25
+            cvs.height / 4 - 100
         );
+        renderStandbyImage();
         startButton.draw();
     } else {
-        // Game phase
         if (countdown > 0) {
-            // Display countdown timer
             ctx.font = "3rem Arial";
             ctx.fillText(countdown, cvs.width / 2, cvs.height / 2);
         } else {
-            // Display goal number and scores
             ctx.font = "4rem Arial";
             ctx.fillText(`Goal: ${goalNumber}`, cvs.width / 2, 150);
             ctx.font = "2rem Arial";
@@ -130,7 +141,6 @@ function render() {
                 cvs.width / 2,
                 50
             );
-            // Draw all cards
             cardsOnField.forEach((card) => card.draw());
         }
     }
@@ -138,12 +148,9 @@ function render() {
 
 // Start the next round
 function startNextTurn() {
-    // Randomly select a goal number
     goalNumber = Math.floor(Math.random() * maxCards) + 1;
     cardsOnField.length = 0; // Clear current cards
-    shuffleArray(cardValues); // Shuffle card values
-
-    // Arrange cards on the canvas
+    shuffleArray(cardValues);
     cardValues.forEach((value, index) => {
         const row = Math.floor(index / numCardsPerRow);
         const col = index % numCardsPerRow;
@@ -155,22 +162,18 @@ function startNextTurn() {
         const startY = canvasCenterY - totalRowsHeight / 2;
         const x = startX + col * (cardWidth + cardSpacing);
         const y = startY + row * (cardHeight + cardSpacing);
-
         cardsOnField.push(new Card(x, y, value));
     });
-
-    isInteractable = false; // Player cant interact when countdown hasnt stopped
-    countdown = 3; // Reset countdown timer
-
-    // Countdown logic
+    isInteractable = false;
+    countdown = 3;
     const countdownInterval = setInterval(() => {
         if (countdown === 0) {
             clearInterval(countdownInterval);
             render();
-            isInteractable = true; // Game started now
+            isInteractable = true;
             setTimeout(() => {
                 if (isInteractable) {
-                    handleComputerPick(); // Computer will pick if players dont pick card in time
+                    handleComputerPick();
                 }
             }, computerReactionTime);
         } else {
@@ -197,32 +200,39 @@ function handleComputerPick() {
         targetCard.color = "red";
         computerScore++;
     }
-    isInteractable = false; //Player cant pick after computer has picked
+    isInteractable = false;
     checkGameOver();
 }
 
 // Check if the game is over and handle end conditions
 function checkGameOver() {
     render();
-
     if (playerScore === pointToWin || computerScore === pointToWin) {
-        // Display victory message
+        gameOver = true; // Set game over state
         setTimeout(() => {
             ctx.clearRect(0, 0, cvs.width, cvs.height);
+            // Display the result message
             ctx.font = "3rem Arial";
             ctx.textAlign = "center";
             ctx.fillStyle = "black";
-            ctx.fillText(
-                playerScore === pointToWin ? "You Win!" : "Computer Wins!",
-                cvs.width / 2,
-                cvs.height / 2
-            );
+            const message = playerScore === pointToWin ? "You Win!" : "You Lose!";
+            ctx.fillText(message, cvs.width / 2, cvs.height / 4 - 100);
+            
+            // Load and display the corresponding image
+            const img = new Image();
+            img.src = playerScore === pointToWin
+                ? "Player_win.jpg"
+                : "Player_lose.jpg";
+            
+            img.onload = () => {
+                const imgX = cvs.width / 2 - 150; // Center the image
+                const imgY = cvs.height / 2 - 200; // Place image below the text
+                ctx.drawImage(img, imgX, imgY, 300, 400);
+            };
         }, 1000);
-
-        // Wait before returning to start screen
-        setTimeout(resetGame, 2000);
+        setTimeout(resetGame, 3000); // Reset game after 3 seconds
     } else {
-        computerReactionTime = Math.max(500, computerReactionTime - 200); // Adjust computer speed
+        computerReactionTime = Math.max(500, computerReactionTime - 200);
         setTimeout(startNextTurn, 1000);
     }
 }
@@ -232,7 +242,8 @@ function resetGame() {
     playerScore = 0;
     computerScore = 0;
     computerReactionTime = 1300;
-    isStarted = false; // Return to start screen 
+    isStarted = false;
+    gameOver = false; // Reset game over state
     render();
 }
 
@@ -246,9 +257,9 @@ function shuffleArray(array) {
 
 // Event listener for mouse clicks
 document.addEventListener("mousedown", (e) => {
+    if (gameOver) return; // Ignore clicks if game is over
     const mouseX = e.clientX;
     const mouseY = e.clientY;
-
     if (!isStarted) {
         if (startButton.isClicked(mouseX, mouseY)) {
             isStarted = true;
@@ -262,12 +273,14 @@ document.addEventListener("mousedown", (e) => {
 
 // Update hover state based on mouse movement
 document.addEventListener("mousemove", (e) => {
+    if (gameOver) return; // Ignore mouse move if game is over
     const mouseX = e.clientX;
     const mouseY = e.clientY;
     cardsOnField.forEach(card => {
-        card.isHovered = card.isPointInside(mouseX, mouseY);
+        if (isInteractable) card.isHovered = card.isPointInside(mouseX, mouseY);
     });
     render();
 });
 
+// Initial render
 render();
