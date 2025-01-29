@@ -9,7 +9,7 @@ const ctx = cvs.getContext("2d");
 const maxCards = 10;
 const cardValues = Array.from({ length: maxCards }, (_, i) => i + 1);
 const cardsOnField = [];
-let pointToWin = 1; // Points required to win
+let pointToWin = 2; // Points required to win
 let goalNumber = 0;
 let playerScore = 0;
 let computerScore = 0;
@@ -17,11 +17,7 @@ let isInteractable = false;
 let isStarted = false;
 let gameOver = false; // Add a game over state
 let countdown = 3; // Countdown timer before interaction
-<<<<<<< HEAD
-let computerReactionTime = 1000; // Reaction time for the computer in milliseconds
-=======
 let computerReactionTime = 1300; // Reaction time for the computer in milliseconds
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
 
 // Card layout dimensions
 const cardWidth = 100;
@@ -86,11 +82,7 @@ class StartButton {
         ctx.strokeStyle = "black";
         ctx.lineWidth = 3;
         ctx.stroke();
-<<<<<<< HEAD
-        ctx.font = "2rem Baloo";
-=======
         ctx.font = "2rem Arial";
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
         ctx.fillStyle = "black";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -126,11 +118,7 @@ function render() {
     if (gameOver) return; // Prevent further rendering during game over
     ctx.clearRect(0, 0, cvs.width, cvs.height);
     if (!isStarted) {
-<<<<<<< HEAD
-        ctx.font = "2rem Baloo";
-=======
         ctx.font = "2rem Arial";
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
         ctx.textAlign = "center";
         ctx.fillStyle = "black";
         ctx.fillText(
@@ -146,21 +134,12 @@ function render() {
             ctx.fillText(countdown, cvs.width / 2, cvs.height / 2);
         } else {
             ctx.font = "4rem Arial";
-<<<<<<< HEAD
-            ctx.fillText(`Goal: ${goalNumber}`, cvs.width / 2, cvs.height / 4 - 50);
-            ctx.font = "2rem Baloo";
-            ctx.fillText(
-                `Player: ${playerScore} - Computer: ${computerScore}`,
-                cvs.width / 2,
-                cvs.height / 4 - 100
-=======
             ctx.fillText(`Goal: ${goalNumber}`, cvs.width / 2, 150);
             ctx.font = "2rem Arial";
             ctx.fillText(
                 `Player: ${playerScore} - Computer: ${computerScore}`,
                 cvs.width / 2,
                 50
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
             );
             cardsOnField.forEach((card) => card.draw());
         }
@@ -225,13 +204,6 @@ function handleComputerPick() {
     checkGameOver();
 }
 
-<<<<<<< HEAD
-// Load the win and lose sound files
-const winSound = new Audio("Player_win.mp3");
-const loseSound = new Audio("Player_lose.mp3");
-
-=======
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
 // Check if the game is over and handle end conditions
 function checkGameOver() {
     render();
@@ -240,16 +212,9 @@ function checkGameOver() {
         setTimeout(() => {
             ctx.clearRect(0, 0, cvs.width, cvs.height);
             // Display the result message
-<<<<<<< HEAD
-            ctx.font = "4rem Baloo";
-            ctx.textAlign = "center";
-            ctx.fillStyle = "black";
-            const isPlayerWin = playerScore === pointToWin;
-=======
             ctx.font = "3rem Arial";
             ctx.textAlign = "center";
             ctx.fillStyle = "black";
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
             const message = playerScore === pointToWin ? "You Win!" : "You Lose!";
             ctx.fillText(message, cvs.width / 2, cvs.height / 4 - 100);
             
@@ -264,23 +229,8 @@ function checkGameOver() {
                 const imgY = cvs.height / 2 - 200; // Place image below the text
                 ctx.drawImage(img, imgX, imgY, 300, 400);
             };
-<<<<<<< HEAD
-
-            // Play the corresponding sound
-            if (isPlayerWin) {
-                winSound.currentTime = 0; // Reset sound to start
-                winSound.play();
-            } else {
-                loseSound.currentTime = 0;
-                loseSound.play();
-            }
-
-        }, 500);
-        setTimeout(resetGame, 4000); // Reset game after 3 seconds
-=======
         }, 1000);
         setTimeout(resetGame, 3000); // Reset game after 3 seconds
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
     } else {
         computerReactionTime = Math.max(500, computerReactionTime - 200);
         setTimeout(startNextTurn, 1000);
@@ -291,11 +241,7 @@ function checkGameOver() {
 function resetGame() {
     playerScore = 0;
     computerScore = 0;
-<<<<<<< HEAD
-    computerReactionTime = 1000;
-=======
     computerReactionTime = 1300;
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
     isStarted = false;
     gameOver = false; // Reset game over state
     render();
