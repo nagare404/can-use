@@ -56,11 +56,7 @@ class Button {
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-<<<<<<< HEAD
         ctx.font = "1rem Baloo";
-=======
-        ctx.font = "1rem Arial";
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillStyle = "black";
@@ -83,7 +79,6 @@ function rollAllDices(dices) {
     });
 }
 
-<<<<<<< HEAD
 /*Render Images*/
 const standbyImage = new Image();
 standbyImage.src = "Standby.jpg";
@@ -133,13 +128,6 @@ function compare(computer_value, player_value, goal_number) {
 
     resultImage.src = "Player_win.jpg";
     winSound.play(); // Phát âm thanh thắng
-=======
-function compare(computer_value, player_value, goal_number) {
-    const computerDiff = Math.abs(computer_value - goal_number);
-    const playerDiff = Math.abs(player_value - goal_number);
-    if (computerDiff < playerDiff) return "Computer Won!";
-    if (computerDiff === playerDiff) return "Draw!";
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
     return "You Won!";
 }
 
@@ -185,11 +173,7 @@ function render(showButtons = false) {
                 }
             ).draw(ctx);
         }
-<<<<<<< HEAD
         renderStandbyImage();
-
-=======
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
         isInteractable = true;
     }
 }
@@ -225,7 +209,6 @@ function startPlayerGame() {
 
     // Create divs for "You" and "Computer" at corresponding dice positions
     let playerDiv = document.createElement('div');
-<<<<<<< HEAD
     playerDiv.classList.add('dice-result');
     playerDiv.innerHTML = `You: ${playerSum}`;
     playerDiv.style.left = '50px';
@@ -237,19 +220,6 @@ function startPlayerGame() {
     computerDiv.innerHTML = `Computer: ${computerSum}`;
     computerDiv.style.left = '50px';
     computerDiv.style.top = `${cvs.height / 3 * 2 + 20}px`;
-=======
-    playerDiv.classList.add('game-result');
-    playerDiv.innerHTML = `You: ${playerSum}`;
-    playerDiv.style.left = '510px';
-    playerDiv.style.top = `${cvs.height / 2 + 50}px`;
-    document.body.appendChild(playerDiv);
-
-    let computerDiv = document.createElement('div');
-    computerDiv.classList.add('game-result');
-    computerDiv.innerHTML = `Computer: ${computerSum}`;
-    computerDiv.style.left = '510px';
-    computerDiv.style.top = `${cvs.height / 2 - 100}px`;
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
     document.body.appendChild(computerDiv);
 
     // Create div for result, centered on the screen
@@ -259,12 +229,9 @@ function startPlayerGame() {
     resultDiv.style.left = `${cvs.width / 2 - resultDiv.offsetWidth / 2}px`;
     resultDiv.style.top = `${cvs.height / 2}px`;
     document.body.appendChild(resultDiv);
-<<<<<<< HEAD
-    
     // Render the result image (Win/Lose/Draw)
     renderResultImage(); // Call this function to render the result image
-=======
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
+
 
     // Remove results after 3 seconds and restart the game
     setTimeout(() => {

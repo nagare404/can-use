@@ -15,38 +15,24 @@ body {
     font-size: 2rem;
     color: black;
     padding: 10px;
-<<<<<<< HEAD
-    /*background-color: rgba(255, 255, 255, 0.8);*/
-=======
-    background-color: rgb(255, 255, 255, 0.8);
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
 }
 
 .game-rule {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-<<<<<<< HEAD
     white-space: nowrap;
     font-family: "Baloo";
 }
 
 .goal-number {
     top: 80px;
-=======
-    white-space: nowrap; /* Prevent line break */
-}
-
-.goal-number {
-    top: 120px;
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
     left: 50%;
     transform: translateX(-50%);
     background-color: rgba(228, 52, 52, 1);
 }
 
 .button-instruction {
-<<<<<<< HEAD
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
@@ -85,32 +71,6 @@ body {
     transform: translate(-50%, -50%);  /* Điều chỉnh để phần tử căn giữa chính xác */
     font-size: 1.5rem;   /* Bạn có thể thay đổi kích thước chữ ở đây */
     text-align: center;  /* Căn giữa nội dung chữ trong phần tử */
-=======
-    bottom: 200px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.game-result {
-    position: absolute;  /* Position the element absolutely relative to its parent or screen */
-    font-size: 2rem;     /* Set the font size to 2rem */
-    color: black;        /* Set the text color to black */
-    text-align: center;  /* Center the text content inside the element */
-    background-color: rgba(255, 255, 255, 0.8); /* Set background color with 80% transparency */
-    padding: 5px;        /* Set padding between the content and the edges of the element */
-    border-radius: 5px;  /* Round the corners of the element */
-    left: 50%;           /* Position the element horizontally at the center of the screen */
-    transform: translateX(-50%); /* Move the element 50% to the left to center it */
-}
-
-.game-result p {
-    position: absolute;  /* Position the element absolutely */
-    top: 50%;            /* Position the element 50% from the top of the screen */
-    left: 50%;           /* Position the element 50% from the left of the screen */
-    transform: translate(-50%, -50%);  /* Adjust to perfectly center the element */
-    font-size: 1.5rem;   /* You can change the font size here */
-    text-align: center;  /* Center the text content inside the element */
->>>>>>> eee6f507aa10f27f820fb0b7ebe83eea32056658
 }
 
 button {
