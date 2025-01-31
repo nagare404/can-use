@@ -1,17 +1,56 @@
 <!DOCTYPE html>
-<html>
-    <body>
-        <head>
-            <meta charset="UTF-8" />
-            <link rel="stylesheet" href="style.css">
-        </head>
-        <header>
-            <div style="text-align: left">
-                <img src="can_use_logosample.png" width="79" height="24">
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>フリーゲームサイト</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="min-h-screen bg-gradient-to-b from-[#1a1a2e] to-[#16213e]">
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex flex-col items-center mb-12">
+        <img src="https://ucarecdn.com/de5d1db3-8d2d-4345-b032-715c6531978f/" alt="Can Use Logo" class="width-300px md-width-400px mb-6">
+        <div class="text-center">
+          <h1 class="text-2xl md-text-3xl text-white font-bold font-roboto mb-3">フリーゲームサイト</h1>
+          <p class="text-gray-300 text-sm md-text-base font-roboto max-w-2xl mx-auto">
+            Can Useは、誰でも無料で楽しめるブラウザゲームを提供するポータルサイトです。様々なジャンルのゲームを取り揃えていますので、お気に入りのゲームを見つけてお楽しみください。
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md-grid-cols-2 lg-grid-cols-3 gap-8">
+        <div class="bg-1f4068 rounded-lg overflow-hidden hover-transform transition-transform duration-300">
+          <a href="games/Reversi/index.html" class="block">
+            <img src="images/Othello_1.webp" alt="オセロのスクリーンショット" class="width-full height-200px object-cover">
+            <div class="p-4">
+              <h2 class="text-xl font-bold text-white mb-2 font-roboto">オセロゲーム</h2>
+              <p class="text-gray-300 text-sm font-roboto">オセロゲーム。一人でも二人でも楽しむことができます。</p>
             </div>
-        </header>
-        <h2>
-            好きなゲームを選んでください
-        </h2>
-    </body>
+          </a>
+        </div>
+        <div class="bg-1f4068 rounded-lg overflow-hidden hover-transform transition-transform duration-300">
+          <a href="games/Quick_Respond/index" class="block">
+            <img src="images/QR.webp" alt="クイックレスポンスゲームのスクリーンショット" class="width-full height-200px object-cover">
+            <div class="p-4">
+              <h2 class="text-xl font-bold text-white mb-2 font-roboto">クイックレスポンスゲーム</h2>
+              <p class="text-gray-300 text-sm font-roboto">コンピュータより早く目標値の札を選択するゲーム。あなたの反射神経が試されます。</p>
+            </div>
+          </a>
+        </div>
+        <div class="bg-1f4068 rounded-lg overflow-hidden hover-transform transition-transform duration-300">
+          <a href="games/Roll_Dice/index" class="block">
+            <img src="images/Dice.webp" alt="ダイスゲームのスクリーンショット" class="width-full height-200px object-cover">
+            <div class="p-4">
+              <h2 class="text-xl font-bold text-white mb-2 font-roboto">ダイスゲーム</h2>
+              <p class="text-gray-300 text-sm font-roboto">サイコロを振って、コンピュータの合計よりも目標値に近い合計を出すゲーム 。運試しに是非</p>
+            </div>
+          </a>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</body>
 </html>
