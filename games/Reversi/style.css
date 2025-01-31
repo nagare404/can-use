@@ -1,5 +1,8 @@
 body {
-  background: url(https://github.com/oasys-tech/Reversi-4/raw/main/background.jpg);
+  background-image: url('./table2.jpg');
+  background-size: cover; /* 画面全体にフィット */
+  background-repeat: no-repeat; /* 繰り返しを防ぐ */
+  background-position: center; /* 中央に配置 */
 }
 
 .container {
@@ -11,7 +14,7 @@ body {
   text-align: center;
 
   /* 色 */
-  color: antiquewhite;
+  color: black;
 }
 
 #board {

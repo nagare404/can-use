@@ -1,0 +1,80 @@
+/* Ensure the canvas fills the screen */
+body {
+    margin: 0;
+    overflow: hidden;
+    background-image: url('Background.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    font-family: Arial, sans-serif;
+}
+
+.game-rule, .goal-number, .button-instruction {
+    position: absolute;
+    z-index: 1000;
+    font-size: 2rem;
+    color: black;
+    padding: 10px;
+}
+
+.game-rule {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-family: "Baloo";
+}
+
+.goal-number {
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(228, 52, 52, 1);
+}
+
+.button-instruction {
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem; 
+    font-family: "Baloo";
+}
+
+.dice-result {
+    position: absolute;  /* Đặt phần tử vào vị trí tuyệt đối so với phần tử cha hoặc màn hình */
+    font-size: 2rem;     /* Đặt kích thước font chữ là 2rem */
+    color: black;        /* Đặt màu chữ là màu đen */
+    text-align: left;  /* Căn left nội dung văn bản trong phần tử */
+    background-color: rgba(255, 255, 255, 0.8); /* Màu nền trắng với độ trong suốt 80% */
+    padding: 5px;        /* Khoảng cách giữa nội dung và viền của phần tử */
+    border-radius: 5px;  /* Bo tròn các góc của phần tử */
+    left: 100%;           /* Đặt phần tử vào trái*/
+    font-family: "Baloo";
+}
+
+.game-result {
+    position: absolute;  /* Đặt phần tử vào vị trí tuyệt đối so với phần tử cha hoặc màn hình */
+    font-size: 4rem;     /* Đặt kích thước font chữ là 2rem */
+    color: black;        /* Đặt màu chữ là màu đen */
+    text-align: left;  /* Căn left nội dung văn bản trong phần tử */
+    padding: 5px;        /* Khoảng cách giữa nội dung và viền của phần tử */
+    border-radius: 5px;  /* Bo tròn các góc của phần tử */
+    left: 100%;           /* Đặt phần tử vào trái*/
+    transform: translateX(-50%); /* Di chuyển phần tử về bên trái 50% để căn giữa */
+    font-family: "Baloo";
+}
+
+.game-result p {
+    position: absolute;  /* Đặt phần tử vào vị trí tuyệt đối */
+    top: 50%;            /* Căn phần tử từ trên xuống 50% của màn hình */
+    left: 50%;           /* Căn phần tử từ trái sang 50% của màn hình */
+    transform: translate(-50%, -50%);  /* Điều chỉnh để phần tử căn giữa chính xác */
+    font-size: 1.5rem;   /* Bạn có thể thay đổi kích thước chữ ở đây */
+    text-align: center;  /* Căn giữa nội dung chữ trong phần tử */
+}
+
+button {
+    padding: 10px;
+    margin: 5px;
+    font-size: 15rem;
+}
